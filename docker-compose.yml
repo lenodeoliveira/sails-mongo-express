@@ -1,0 +1,44 @@
+version: '3.3'
+
+services:
+
+  mongo_container:
+    container_name: mongo_container
+    image: mongo:5
+    restart: always
+    volumes:
+      - ./data:/data/db
+    ports:
+      - "27017:27017"
+    networks:
+      - sails_network
+  api:
+    container_name: api
+    entrypoint: wait-for mongo_container:27017 -t 40 -- sails lift
+    restart: always
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - 1337:1337
+    volumes:
+      - ./:/app
+      - ./package.json:/app/package.json
+    networks:
+      - sails_network
+  mongo_express:
+    container_name: mongo_express
+    image: mongo-express
+    restart: always
+    environment:
+    - ME_CONFIG_MONGODB_URL=mongodb://mongo:27017
+    - ME_CONFIG_MONGODB_SERVER=mongo_container:mongo
+    ports:
+      - 8081:8081
+    depends_on:
+            - mongo_container
+    networks:
+      - sails_network
+
+networks:
+  sails_network:
