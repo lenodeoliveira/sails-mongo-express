@@ -9,8 +9,6 @@ RUN apt update && \
 
 COPY . .
 
-RUN chmod +x /app/start.sh
-
-RUN npm install -g sails@1.4.2
+RUN npm install && npm install -g sails@1.4.2
 
 EXPOSE 1337
